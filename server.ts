@@ -268,6 +268,9 @@ async function setupVite() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
+    // เสิร์ฟไฟล์ในโฟลเดอร์ public/dataset โดยตรงเพื่อให้รูปที่อัปโหลดใหม่เข้าถึงได้
+    app.use('/dataset', express.static(path.join(process.cwd(), 'public', 'dataset')));
+    
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
