@@ -459,16 +459,17 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
           
           {/* Background Video */}
           <div className="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
-            {cameraActive ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover transform -scale-x-100"
-              />
-            ) : (
-              <div className="p-8 text-center space-y-3 z-10">
+            {/* Always render the video so videoRef is available during startCamera */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`w-full h-full object-cover transform -scale-x-100 ${!cameraActive ? 'hidden' : ''}`}
+            />
+            
+            {!cameraActive && (
+              <div className="p-8 text-center space-y-3 z-10 absolute">
                 <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400 mx-auto">
                   <Camera className="w-7 h-7 text-indigo-400" />
                 </div>
