@@ -360,16 +360,17 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
 
             {/* Video Viewport / Biometric Oval Frame */}
             <div className="relative aspect-square max-h-[360px] w-full bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 flex items-center justify-center">
+              {/* Always render the video so videoRef is available during startCamera */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover transform -scale-x-100 ${!cameraActive ? 'hidden' : ''}`}
+              />
+              
               {cameraActive ? (
                 <>
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover transform -scale-x-100"
-                  />
-                  
                   {/* Biometric Oval Guide Overlay */}
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                     <div className="w-56 h-72 rounded-[50%] border-2 border-indigo-400 border-dashed animate-pulse flex flex-col items-center justify-between py-4">
@@ -391,7 +392,7 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
                   )}
                 </>
               ) : (
-                <div className="p-6 text-center space-y-3">
+                <div className="p-6 text-center space-y-3 absolute">
                   <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400">
                     <Camera className="w-7 h-7" />
                   </div>
