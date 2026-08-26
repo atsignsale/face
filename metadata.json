@@ -1,0 +1,12 @@
+{
+  "name": "FACECONNECT PEA บึงกาฬ",
+  "description": "ระบบลงเวลาปฏิบัติงานการไฟฟ้าส่วนภูมิภาค จังหวัดบึงกาฬ (PEA บึงกาฬ) ด้วย Face Recognition Dataset 5 รูป พร้อมพิกัด GPS บันทึกประวัติเข้า-ออกงาน และเชื่อมต่อ Google Sheets แบบเรียลไทม์",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
+

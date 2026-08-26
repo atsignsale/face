@@ -1,0 +1,197 @@
+import { Employee, AttendanceRecord, OfficeConfig, GoogleSheetConfig } from '../types';
+
+// ─── DATA VERSION ──────────────────────────────────────────────────────────────
+// เปลี่ยนค่านี้ทุกครั้งที่ต้องการ reset localStorage ของผู้ใช้ให้ใช้ข้อมูลใหม่
+export const DATA_VERSION = '2026-08-25-v2';
+
+export const INITIAL_OFFICE_CONFIG: OfficeConfig = {
+  name: 'การไฟฟ้าส่วนภูมิภาค จังหวัดบึงกาฬ (PEA บึงกาฬ)',
+  latitude: 18.3608,
+  longitude: 103.6521,
+  radiusMeters: 800,
+  workStartTime: '08:30',
+  workEndTime: '16:30',
+  lateThresholdMinutes: 15,
+};
+
+export const INITIAL_SHEET_CONFIG: GoogleSheetConfig = {
+  // นำ Google Apps Script Webhook URL มาใส่ที่นี่ เพื่อให้ทุกคนที่ใช้แอพได้ URL นี้ไปใช้ทันที
+  scriptUrl: '',
+  appsScriptUrl: '',
+  sheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+  sheetName: 'Attendance_Logs',
+  autoSync: true,
+  lastSyncTimestamp: null,
+  totalSyncedCount: 0,
+};
+
+export const ANGLE_DEFINITIONS = [
+  { index: 1, name: 'หน้าตรง (Front)', hint: 'มองตรงมาที่กล้อง แสงสว่างชัดเจน' },
+  { index: 2, name: 'หันซ้าย 20° (Slight Left)', hint: 'เอียงใบหน้าไปทางซ้ายเล็กน้อย' },
+  { index: 3, name: 'หันขวา 20° (Slight Right)', hint: 'เอียงใบหน้าไปทางขวาเล็กน้อย' },
+];
+
+// ─── INITIAL EMPLOYEES with real dataset photo paths ──────────────────────────
+// ภาพ dataset จริงเก็บใน public/dataset/{EMP-ID}/{angle}.jpg
+// Vite จะ serve ไฟล์เหล่านี้ผ่าน URL /dataset/{EMP-ID}/{angle}.jpg
+export const INITIAL_EMPLOYEES: Employee[] = [
+  {
+    id: 'EMP-001',
+    fullName: 'นายกิตติคุณ รัตนสุวรรณ',
+    position: 'นักวิชาการคอมพิวเตอร์ชำนาญการ',
+    level: 'ระดับชำนาญการพิเศษ (C8)',
+    department: 'ฝ่ายเทคโนโลยีสารสนเทศและการสื่อสาร',
+    age: 34,
+    phone: '081-456-7890',
+    email: 'kittikhun.r@dept.gov.th',
+    registeredAt: '2026-01-15T08:00:00.000Z',
+    status: 'active',
+    avatarUrl: '/dataset/EMP-001/front.jpg',
+    faceDataset: [
+      { id: 'f-1-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-001/front.jpg', capturedAt: '2026-01-15T08:05:00.000Z' },
+      { id: 'f-1-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-001/left.jpg',  capturedAt: '2026-01-15T08:06:00.000Z' },
+      { id: 'f-1-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-001/right.jpg', capturedAt: '2026-01-15T08:07:00.000Z' },
+    ],
+  },
+  {
+    id: 'EMP-002',
+    fullName: 'นางสาวพิมลดา สิริโชติ',
+    position: 'หัวหน้างานบริหารทรัพยากรบุคคล',
+    level: 'ระดับชำนาญการ (C7)',
+    department: 'ฝ่ายทรัพยากรบุคคลและพัฒนาองค์กร',
+    age: 29,
+    phone: '089-123-4567',
+    email: 'pimonlada.s@dept.gov.th',
+    registeredAt: '2026-02-01T08:30:00.000Z',
+    status: 'active',
+    avatarUrl: '/dataset/EMP-002/front.jpg',
+    faceDataset: [
+      { id: 'f-2-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-002/front.jpg', capturedAt: '2026-02-01T08:31:00.000Z' },
+      { id: 'f-2-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-002/left.jpg',  capturedAt: '2026-02-01T08:32:00.000Z' },
+      { id: 'f-2-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-002/right.jpg', capturedAt: '2026-02-01T08:33:00.000Z' },
+    ],
+  },
+  {
+    id: 'EMP-003',
+    fullName: 'นายธนกร วัฒนพงษ์',
+    position: 'นักวิเคราะห์นโยบายและแผน',
+    level: 'ระดับปฏิบัติการ (C5)',
+    department: 'ฝ่ายยุทธศาสตร์และแผนงาน',
+    age: 27,
+    phone: '062-987-6543',
+    email: 'thanakorn.w@dept.gov.th',
+    registeredAt: '2026-03-10T09:00:00.000Z',
+    status: 'active',
+    avatarUrl: '/dataset/EMP-003/front.jpg',
+    faceDataset: [
+      { id: 'f-3-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-003/front.jpg', capturedAt: '2026-03-10T09:01:00.000Z' },
+      { id: 'f-3-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-003/left.jpg',  capturedAt: '2026-03-10T09:02:00.000Z' },
+      { id: 'f-3-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-003/right.jpg', capturedAt: '2026-03-10T09:03:00.000Z' },
+    ],
+  },
+  {
+    id: 'EMP-004',
+    fullName: 'นางสาวจิราพร บุญเสริม',
+    position: 'เจ้าหน้าที่การเงินและบัญชี',
+    level: 'ระดับชำนาญงาน (C6)',
+    department: 'ฝ่ายการเงิน พัสดุ และงบประมาณ',
+    age: 38,
+    phone: '084-555-1234',
+    email: 'jiraporn.b@dept.gov.th',
+    registeredAt: '2026-03-12T09:15:00.000Z',
+    status: 'active',
+    avatarUrl: '/dataset/EMP-004/front.jpg',
+    faceDataset: [
+      { id: 'f-4-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-004/front.jpg', capturedAt: '2026-03-12T09:16:00.000Z' },
+      { id: 'f-4-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-004/left.jpg',  capturedAt: '2026-03-12T09:17:00.000Z' },
+      { id: 'f-4-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-004/right.jpg', capturedAt: '2026-03-12T09:18:00.000Z' },
+    ],
+  },
+];
+
+export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
+  {
+    id: 'att-101',
+    employeeId: 'EMP-001',
+    employeeName: 'นายกิตติคุณ รัตนสุวรรณ',
+    position: 'นักวิชาการคอมพิวเตอร์ชำนาญการ',
+    level: 'ระดับชำนาญการพิเศษ (C8)',
+    department: 'ฝ่ายเทคโนโลยีสารสนเทศและการสื่อสาร',
+    age: 34,
+    type: 'CHECK_IN',
+    timestamp: '2026-08-25T08:18:22.000Z',
+    timeFormatted: '08:18:22',
+    dateFormatted: '2026-08-25',
+    status: 'ON_TIME',
+    capturedPhoto: '/dataset/EMP-001/front.jpg',
+    confidenceScore: 98.8,
+    matchReason: 'โครงสร้างใบหน้า โหนกแก้ม และระยะดวงตาตรงกับ Dataset มุม 1 และ 4 (98.8%)',
+    location: {
+      latitude: 18.36080,
+      longitude: 103.65210,
+      accuracy: 6,
+      address: 'การไฟฟ้าส่วนภูมิภาคจังหวัดบึงกาฬ (รัศมี 12 เมตร)',
+      inOfficeZone: true,
+      distanceFromOfficeMeters: 12,
+    },
+    syncedToGoogleSheets: true,
+    googleSheetRowId: 'ROW_20260825_001',
+    device: 'Web Client / Mobile Scanner (GPS Verified)',
+  },
+  {
+    id: 'att-102',
+    employeeId: 'EMP-002',
+    employeeName: 'นางสาวพิมลดา สิริโชติ',
+    position: 'หัวหน้างานบริหารทรัพยากรบุคคล',
+    level: 'ระดับชำนาญการ (C7)',
+    department: 'ฝ่ายทรัพยากรบุคคลและพัฒนาองค์กร',
+    age: 29,
+    type: 'CHECK_IN',
+    timestamp: '2026-08-25T08:24:10.000Z',
+    timeFormatted: '08:24:10',
+    dateFormatted: '2026-08-25',
+    status: 'ON_TIME',
+    capturedPhoto: '/dataset/EMP-002/front.jpg',
+    confidenceScore: 99.1,
+    matchReason: 'อัตราส่วนดวงตา จมูก และคางสอดคล้องกับ Dataset 3 มุมมอง (99.1%)',
+    location: {
+      latitude: 18.36082,
+      longitude: 103.65216,
+      accuracy: 5,
+      address: 'การไฟฟ้าส่วนภูมิภาคจังหวัดบึงกาฬ (รัศมี 8 เมตร)',
+      inOfficeZone: true,
+      distanceFromOfficeMeters: 8,
+    },
+    syncedToGoogleSheets: true,
+    googleSheetRowId: 'ROW_20260825_002',
+    device: 'Mobile Safari / iOS GPS',
+  },
+  {
+    id: 'att-103',
+    employeeId: 'EMP-003',
+    employeeName: 'นายธนกร วัฒนพงษ์',
+    position: 'นักวิเคราะห์นโยบายและแผน',
+    level: 'ระดับปฏิบัติการ (C5)',
+    department: 'ฝ่ายยุทธศาสตร์และแผนงาน',
+    age: 27,
+    type: 'CHECK_IN',
+    timestamp: '2026-08-25T08:42:15.000Z',
+    timeFormatted: '08:42:15',
+    dateFormatted: '2026-08-25',
+    status: 'LATE',
+    capturedPhoto: '/dataset/EMP-003/front.jpg',
+    confidenceScore: 97.4,
+    matchReason: 'ตรวจสอบจุดชีวมิติใบหน้าตรงกับประวัติพนักงาน รหัส EMP-003 (97.4%)',
+    location: {
+      latitude: 18.36090,
+      longitude: 103.65205,
+      accuracy: 10,
+      address: 'การไฟฟ้าส่วนภูมิภาคจังหวัดบึงกาฬ (รัศมี 22 เมตร)',
+      inOfficeZone: true,
+      distanceFromOfficeMeters: 22,
+    },
+    syncedToGoogleSheets: true,
+    googleSheetRowId: 'ROW_20260825_003',
+    device: 'Chrome on Windows / Desk Cam',
+  },
+];
