@@ -32,11 +32,11 @@ export const ANGLE_DEFINITIONS = [
 ];
 
 // ─── INITIAL EMPLOYEES with real dataset photo paths ──────────────────────────
-// ภาพ dataset จริงเก็บใน public/dataset/{EMP-ID}/{angle}.jpg
-// Vite จะ serve ไฟล์เหล่านี้ผ่าน URL /dataset/{EMP-ID}/{angle}.jpg
+// ภาพ dataset จริงเก็บใน public/dataset/{PEA-ID}/{angle}.jpg
+// Vite จะ serve ไฟล์เหล่านี้ผ่าน URL /dataset/{PEA-ID}/{angle}.jpg
 export const INITIAL_EMPLOYEES: Employee[] = [
   {
-    id: 'EMP-001',
+    id: 'PEA-001',
     fullName: 'นายกิตติคุณ รัตนสุวรรณ',
     position: 'นักวิชาการคอมพิวเตอร์ชำนาญการ',
     level: 'ระดับชำนาญการพิเศษ (C8)',
@@ -46,15 +46,15 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     email: 'kittikhun.r@dept.gov.th',
     registeredAt: '2026-01-15T08:00:00.000Z',
     status: 'active',
-    avatarUrl: '/dataset/EMP-001/front.jpg',
+    avatarUrl: '/dataset/PEA-001/front.jpg',
     faceDataset: [
-      { id: 'f-1-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-001/front.jpg', capturedAt: '2026-01-15T08:05:00.000Z' },
-      { id: 'f-1-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-001/left.jpg',  capturedAt: '2026-01-15T08:06:00.000Z' },
-      { id: 'f-1-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-001/right.jpg', capturedAt: '2026-01-15T08:07:00.000Z' },
+      { id: 'f-1-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-001/front.jpg', capturedAt: '2026-01-15T08:05:00.000Z' },
+      { id: 'f-1-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-001/left.jpg',  capturedAt: '2026-01-15T08:06:00.000Z' },
+      { id: 'f-1-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-001/right.jpg', capturedAt: '2026-01-15T08:07:00.000Z' },
     ],
   },
   {
-    id: 'EMP-002',
+    id: 'PEA-002',
     fullName: 'นางสาวพิมลดา สิริโชติ',
     position: 'หัวหน้างานบริหารทรัพยากรบุคคล',
     level: 'ระดับชำนาญการ (C7)',
@@ -64,15 +64,15 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     email: 'pimonlada.s@dept.gov.th',
     registeredAt: '2026-02-01T08:30:00.000Z',
     status: 'active',
-    avatarUrl: '/dataset/EMP-002/front.jpg',
+    avatarUrl: '/dataset/PEA-002/front.jpg',
     faceDataset: [
-      { id: 'f-2-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-002/front.jpg', capturedAt: '2026-02-01T08:31:00.000Z' },
-      { id: 'f-2-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-002/left.jpg',  capturedAt: '2026-02-01T08:32:00.000Z' },
-      { id: 'f-2-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-002/right.jpg', capturedAt: '2026-02-01T08:33:00.000Z' },
+      { id: 'f-2-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-002/front.jpg', capturedAt: '2026-02-01T08:31:00.000Z' },
+      { id: 'f-2-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-002/left.jpg',  capturedAt: '2026-02-01T08:32:00.000Z' },
+      { id: 'f-2-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-002/right.jpg', capturedAt: '2026-02-01T08:33:00.000Z' },
     ],
   },
   {
-    id: 'EMP-003',
+    id: 'PEA-003',
     fullName: 'นายธนกร วัฒนพงษ์',
     position: 'นักวิเคราะห์นโยบายและแผน',
     level: 'ระดับปฏิบัติการ (C5)',
@@ -82,15 +82,15 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     email: 'thanakorn.w@dept.gov.th',
     registeredAt: '2026-03-10T09:00:00.000Z',
     status: 'active',
-    avatarUrl: '/dataset/EMP-003/front.jpg',
+    avatarUrl: '/dataset/PEA-003/front.jpg',
     faceDataset: [
-      { id: 'f-3-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-003/front.jpg', capturedAt: '2026-03-10T09:01:00.000Z' },
-      { id: 'f-3-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-003/left.jpg',  capturedAt: '2026-03-10T09:02:00.000Z' },
-      { id: 'f-3-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-003/right.jpg', capturedAt: '2026-03-10T09:03:00.000Z' },
+      { id: 'f-3-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-003/front.jpg', capturedAt: '2026-03-10T09:01:00.000Z' },
+      { id: 'f-3-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-003/left.jpg',  capturedAt: '2026-03-10T09:02:00.000Z' },
+      { id: 'f-3-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-003/right.jpg', capturedAt: '2026-03-10T09:03:00.000Z' },
     ],
   },
   {
-    id: 'EMP-004',
+    id: 'PEA-004',
     fullName: 'นางสาวจิราพร บุญเสริม',
     position: 'เจ้าหน้าที่การเงินและบัญชี',
     level: 'ระดับชำนาญงาน (C6)',
@@ -100,11 +100,11 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     email: 'jiraporn.b@dept.gov.th',
     registeredAt: '2026-03-12T09:15:00.000Z',
     status: 'active',
-    avatarUrl: '/dataset/EMP-004/front.jpg',
+    avatarUrl: '/dataset/PEA-004/front.jpg',
     faceDataset: [
-      { id: 'f-4-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/EMP-004/front.jpg', capturedAt: '2026-03-12T09:16:00.000Z' },
-      { id: 'f-4-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/EMP-004/left.jpg',  capturedAt: '2026-03-12T09:17:00.000Z' },
-      { id: 'f-4-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/EMP-004/right.jpg', capturedAt: '2026-03-12T09:18:00.000Z' },
+      { id: 'f-4-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-004/front.jpg', capturedAt: '2026-03-12T09:16:00.000Z' },
+      { id: 'f-4-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-004/left.jpg',  capturedAt: '2026-03-12T09:17:00.000Z' },
+      { id: 'f-4-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-004/right.jpg', capturedAt: '2026-03-12T09:18:00.000Z' },
     ],
   },
 ];
@@ -112,7 +112,7 @@ export const INITIAL_EMPLOYEES: Employee[] = [
 export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
   {
     id: 'att-101',
-    employeeId: 'EMP-001',
+    employeeId: 'PEA-001',
     employeeName: 'นายกิตติคุณ รัตนสุวรรณ',
     position: 'นักวิชาการคอมพิวเตอร์ชำนาญการ',
     level: 'ระดับชำนาญการพิเศษ (C8)',
@@ -123,7 +123,7 @@ export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
     timeFormatted: '08:18:22',
     dateFormatted: '2026-08-25',
     status: 'ON_TIME',
-    capturedPhoto: '/dataset/EMP-001/front.jpg',
+    capturedPhoto: '/dataset/PEA-001/front.jpg',
     confidenceScore: 98.8,
     matchReason: 'โครงสร้างใบหน้า โหนกแก้ม และระยะดวงตาตรงกับ Dataset มุม 1 และ 4 (98.8%)',
     location: {
@@ -140,7 +140,7 @@ export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
   },
   {
     id: 'att-102',
-    employeeId: 'EMP-002',
+    employeeId: 'PEA-002',
     employeeName: 'นางสาวพิมลดา สิริโชติ',
     position: 'หัวหน้างานบริหารทรัพยากรบุคคล',
     level: 'ระดับชำนาญการ (C7)',
@@ -151,7 +151,7 @@ export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
     timeFormatted: '08:24:10',
     dateFormatted: '2026-08-25',
     status: 'ON_TIME',
-    capturedPhoto: '/dataset/EMP-002/front.jpg',
+    capturedPhoto: '/dataset/PEA-002/front.jpg',
     confidenceScore: 99.1,
     matchReason: 'อัตราส่วนดวงตา จมูก และคางสอดคล้องกับ Dataset 3 มุมมอง (99.1%)',
     location: {
@@ -168,7 +168,7 @@ export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
   },
   {
     id: 'att-103',
-    employeeId: 'EMP-003',
+    employeeId: 'PEA-003',
     employeeName: 'นายธนกร วัฒนพงษ์',
     position: 'นักวิเคราะห์นโยบายและแผน',
     level: 'ระดับปฏิบัติการ (C5)',
@@ -179,9 +179,9 @@ export const INITIAL_ATTENDANCE_RECORDS: AttendanceRecord[] = [
     timeFormatted: '08:42:15',
     dateFormatted: '2026-08-25',
     status: 'LATE',
-    capturedPhoto: '/dataset/EMP-003/front.jpg',
+    capturedPhoto: '/dataset/PEA-003/front.jpg',
     confidenceScore: 97.4,
-    matchReason: 'ตรวจสอบจุดชีวมิติใบหน้าตรงกับประวัติพนักงาน รหัส EMP-003 (97.4%)',
+    matchReason: 'ตรวจสอบจุดชีวมิติใบหน้าตรงกับประวัติพนักงาน รหัส PEA-003 (97.4%)',
     location: {
       latitude: 18.36090,
       longitude: 103.65205,
