@@ -141,6 +141,7 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
         setProcessingStatusText('กำลังโหลด AI Models...');
         await Promise.all([
           faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+          faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
           faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
           faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
         ]);
@@ -164,9 +165,18 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
                     img.onerror = () => reject(new Error('Image failed to load: ' + photo.dataUrl));
                  });
 
-                 const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                 let detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                 
+                 // Fallback for mobile: If standard SSD fails, try TinyFaceDetector
+                 if (!detection) {
+                    const tinyOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.2 });
+                    detection = await faceapi.detectSingleFace(img, tinyOptions).withFaceLandmarks().withFaceDescriptor();
+                 }
+
                  if (detection) {
                     descriptors.push(detection.descriptor);
+                 } else {
+                    console.warn(`Could not detect face in image ${photo.dataUrl.substring(0, 30)}...`);
                  }
              } catch (imgErr) {
                  console.warn("Skipped invalid photo for employee", emp.id, imgErr);
@@ -312,6 +322,11 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
           // ปรับลด minConfidence เป็น 0.25 เพื่อให้ตรวจจับใบหน้าในมือถือที่แสงน้อยหรือกล้องไม่ชัดได้ง่ายที่สุด
           const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.25 });
           detection = await faceapi.detectSingleFace(img, options).withFaceLandmarks().withFaceDescriptor();
+
+          if (!detection) {
+             const tinyOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.2 });
+             detection = await faceapi.detectSingleFace(img, tinyOptions).withFaceLandmarks().withFaceDescriptor();
+          }
         } catch (err) {
           console.warn('Face detection processing error:', err);
         }
