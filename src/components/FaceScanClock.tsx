@@ -74,12 +74,12 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
     sheetSyncStatus: string;
   } | null>(null);
 
-  // Determine if the currently selected employee or last verified employee has clocked in today
+  // Determine if the currently selected employee or last verified employee has clocked in/out today
   const todayDateStr = new Date().toISOString().slice(0, 10);
   
   const effectiveEmployeeId = selectedTargetEmployeeId !== 'AUTO'
     ? selectedTargetEmployeeId
-    : lastResult?.matchedEmployee?.id || null;
+    : scannedResult?.matchedEmployee?.id || lastResult?.matchedEmployee?.id || null;
 
   const hasClockedInToday = Boolean(
     effectiveEmployeeId &&
@@ -88,7 +88,15 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
     )
   );
 
+  const hasClockedOutToday = Boolean(
+    effectiveEmployeeId &&
+    attendanceRecords.some(
+      (r) => r.employeeId === effectiveEmployeeId && r.dateFormatted === todayDateStr && r.type === 'CHECK_OUT'
+    )
+  );
+
   const isClockInDisabled = isProcessing || hasClockedInToday;
+  const isClockOutDisabled = isProcessing || hasClockedOutToday;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -636,23 +644,34 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
           <button
             id="btn-clock-out"
             onClick={() => handleTriggerAttendance('CHECK_OUT')}
-            disabled={isProcessing}
-            title="กดเพื่อสแกนใบหน้าลงเวลาออกงาน"
-            className={`bg-rose-500 hover:bg-rose-600 text-white py-4 px-6 rounded-2xl font-bold text-sm sm:text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-3 transition-all active:scale-98 cursor-pointer disabled:opacity-50 ${
-              hasClockedInToday ? 'ring-2 ring-rose-400/50 shadow-rose-300' : ''
+            disabled={isClockOutDisabled}
+            title={hasClockedOutToday ? 'ลงเวลาออกงานวันนี้เรียบร้อยแล้ว' : 'กดเพื่อสแกนใบหน้าลงเวลาออกงาน'}
+            className={`py-4 px-6 rounded-2xl font-bold text-sm sm:text-base shadow-lg flex items-center justify-center gap-3 transition-all ${
+              hasClockedOutToday
+                ? 'bg-slate-100 border border-slate-200 text-slate-400 opacity-40 cursor-not-allowed shadow-none scale-98 pointer-events-none'
+                : isProcessing
+                ? 'bg-rose-500/70 text-white opacity-50 cursor-wait'
+                : 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-200 active:scale-98 cursor-pointer'
             }`}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className={`w-5 h-5 ${hasClockedOutToday ? 'text-slate-400' : 'text-white'}`} />
             <div className="text-left">
               <div className="leading-tight flex items-center gap-1.5">
                 <span>ลงเวลาออกงาน</span>
-                {hasClockedInToday && (
+                {hasClockedOutToday && (
+                  <span className="text-[9px] bg-slate-200 text-slate-600 px-1.5 py-0.2 rounded font-bold">
+                    ออกงานแล้ว
+                  </span>
+                )}
+                {!hasClockedOutToday && hasClockedInToday && (
                   <span className="text-[9px] bg-rose-700/80 text-white px-1.5 py-0.2 rounded font-bold animate-pulse">
                     พร้อมออกงาน
                   </span>
                 )}
               </div>
-              <div className="text-[10px] font-normal uppercase tracking-wider text-rose-100">Clock Out & Sync</div>
+              <div className={`text-[10px] font-normal uppercase tracking-wider ${hasClockedOutToday ? 'text-slate-400' : 'text-rose-100'}`}>
+                {hasClockedOutToday ? 'Clocked Out Today' : 'Clock Out & Sync'}
+              </div>
             </div>
           </button>
           </div>
