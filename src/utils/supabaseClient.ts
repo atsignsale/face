@@ -90,7 +90,8 @@ export const saveEmployee = async (employee: Employee) => {
     return;
   }
 
-  const { error } = await supabase.from('employees').upsert({
+  // 1. Save Employee data
+  const { error: empError } = await supabase.from('employees').upsert({
     id: employee.id,
     full_name: employee.fullName,
     position: employee.position,
@@ -103,7 +104,26 @@ export const saveEmployee = async (employee: Employee) => {
     registered_at: employee.registeredAt,
     status: employee.status
   });
-  if (error) console.error('Error saving employee:', error);
+  if (empError) console.error('Error saving employee:', empError);
+
+  // 2. Save Face Dataset if exists
+  if (employee.faceDataset && employee.faceDataset.length > 0) {
+    // Clear old dataset for this employee
+    await supabase.from('face_datasets').delete().eq('employee_id', employee.id);
+    
+    // Insert new dataset
+    const datasetToInsert = employee.faceDataset.map(ds => ({
+      id: ds.id,
+      employee_id: employee.id,
+      angle_index: ds.angleIndex,
+      angle_name: ds.angleName,
+      data_url: ds.dataUrl,
+      captured_at: ds.capturedAt
+    }));
+    
+    const { error: dsError } = await supabase.from('face_datasets').insert(datasetToInsert);
+    if (dsError) console.error('Error saving face dataset:', dsError);
+  }
 };
 
 export const deleteEmployee = async (id: string) => {
