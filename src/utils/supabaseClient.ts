@@ -5,10 +5,39 @@ import { Employee, AttendanceRecord, OfficeConfig, GoogleSheetConfig, FacePhotoI
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// ตรวจสอบว่าได้ตั้งค่า Supabase จริงๆ แล้วหรือไม่ (ไม่ใช่ค่า default หรือค่าตัวอย่าง)
+const isSupabaseConfigured = 
+  supabaseUrl && 
+  supabaseUrl !== 'YOUR_SUPABASE_URL' && 
+  !supabaseUrl.includes('YOUR-PROJECT-ID') &&
+  supabaseUrl.startsWith('https://');
+
+export const supabase = isSupabaseConfigured ? createClient(supabaseUrl, supabaseKey) : null as any;
+
+// --- Helper Functions for LocalStorage Fallback ---
+const getLocalItem = <T>(key: string, defaultValue: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (e) {
+    return defaultValue;
+  }
+};
+
+const setLocalItem = <T>(key: string, value: T) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Error saving to localStorage:`, e);
+  }
+};
 
 // --- Employees API ---
 export const fetchEmployees = async (): Promise<Employee[]> => {
+  if (!isSupabaseConfigured) {
+    return getLocalItem<Employee[]>('face_employees', []);
+  }
+
   const { data, error } = await supabase
     .from('employees')
     .select(`
@@ -43,6 +72,18 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
 };
 
 export const saveEmployee = async (employee: Employee) => {
+  if (!isSupabaseConfigured) {
+    const emps = getLocalItem<Employee[]>('face_employees', []);
+    const index = emps.findIndex(e => e.id === employee.id);
+    if (index > -1) {
+      emps[index] = employee;
+    } else {
+      emps.push(employee);
+    }
+    setLocalItem('face_employees', emps);
+    return;
+  }
+
   const { error } = await supabase.from('employees').upsert({
     id: employee.id,
     full_name: employee.fullName,
@@ -60,22 +101,45 @@ export const saveEmployee = async (employee: Employee) => {
 };
 
 export const deleteEmployee = async (id: string) => {
+  if (!isSupabaseConfigured) {
+    const emps = getLocalItem<Employee[]>('face_employees', []);
+    setLocalItem('face_employees', emps.filter(e => e.id !== id));
+    return;
+  }
+
   const { error } = await supabase.from('employees').delete().eq('id', id);
   if (error) console.error('Error deleting employee:', error);
 };
 
 export const deleteMultipleEmployees = async (ids: string[]) => {
+  if (!isSupabaseConfigured) {
+    const emps = getLocalItem<Employee[]>('face_employees', []);
+    setLocalItem('face_employees', emps.filter(e => !ids.includes(e.id)));
+    return;
+  }
+
   const { error } = await supabase.from('employees').delete().in('id', ids);
   if (error) console.error('Error deleting employees:', error);
 }
 
 export const deleteAllEmployees = async () => {
+  if (!isSupabaseConfigured) {
+    setLocalItem('face_employees', []);
+    return;
+  }
+
   const { error } = await supabase.from('employees').delete().neq('id', 'dummy');
   if (error) console.error('Error deleting all employees:', error);
 }
 
 // --- Attendance API ---
 export const fetchAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
+  if (!isSupabaseConfigured) {
+    const records = getLocalItem<AttendanceRecord[]>('face_attendance', []);
+    // Sort descending by timestamp
+    return records.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
   const { data, error } = await supabase.from('attendance_records').select('*').order('timestamp', { ascending: false });
   if (error) {
     console.error('Error fetching attendance records:', error);
@@ -112,6 +176,18 @@ export const fetchAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
 };
 
 export const saveAttendanceRecord = async (record: AttendanceRecord) => {
+  if (!isSupabaseConfigured) {
+    const records = getLocalItem<AttendanceRecord[]>('face_attendance', []);
+    const index = records.findIndex(r => r.id === record.id);
+    if (index > -1) {
+      records[index] = record;
+    } else {
+      records.push(record);
+    }
+    setLocalItem('face_attendance', records);
+    return;
+  }
+
   const { error } = await supabase.from('attendance_records').upsert({
     id: record.id,
     employee_id: record.employeeId,
@@ -142,17 +218,32 @@ export const saveAttendanceRecord = async (record: AttendanceRecord) => {
 };
 
 export const deleteAttendanceRecord = async (id: string) => {
+  if (!isSupabaseConfigured) {
+    const records = getLocalItem<AttendanceRecord[]>('face_attendance', []);
+    setLocalItem('face_attendance', records.filter(r => r.id !== id));
+    return;
+  }
+
   const { error } = await supabase.from('attendance_records').delete().eq('id', id);
   if (error) console.error('Error deleting attendance record:', error);
 };
 
 export const deleteAllAttendanceRecords = async () => {
+  if (!isSupabaseConfigured) {
+    setLocalItem('face_attendance', []);
+    return;
+  }
+
   const { error } = await supabase.from('attendance_records').delete().neq('id', 'dummy');
   if (error) console.error('Error deleting all attendance records:', error);
 };
 
 // --- App Settings API ---
 export const fetchAppSetting = async <T>(key: string, defaultValue: T): Promise<T> => {
+  if (!isSupabaseConfigured) {
+    return getLocalItem<T>(`face_setting_${key}`, defaultValue);
+  }
+
   const { data, error } = await supabase.from('app_settings').select('config_value').eq('config_key', key).maybeSingle();
   if (error || !data) {
     return defaultValue;
@@ -161,6 +252,11 @@ export const fetchAppSetting = async <T>(key: string, defaultValue: T): Promise<
 };
 
 export const saveAppSetting = async (key: string, value: any) => {
+  if (!isSupabaseConfigured) {
+    setLocalItem(`face_setting_${key}`, value);
+    return;
+  }
+
   const { error } = await supabase.from('app_settings').upsert({
     config_key: key,
     config_value: value
