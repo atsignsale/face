@@ -297,8 +297,8 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
             img.onerror = () => reject(new Error('Failed to load snapshot image')); 
           });
           
-          // ปรับลด minConfidence เป็น 0.4 (จาก 0.5) เพื่อให้ตรวจจับใบหน้าในมือถือที่แสงน้อยได้ดีขึ้น
-          const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 });
+          // ปรับลด minConfidence เป็น 0.25 เพื่อให้ตรวจจับใบหน้าในมือถือที่แสงน้อยหรือกล้องไม่ชัดได้ง่ายที่สุด
+          const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.25 });
           detection = await faceapi.detectSingleFace(img, options).withFaceLandmarks().withFaceDescriptor();
         } catch (err) {
           console.warn('Face detection processing error:', err);
@@ -308,7 +308,7 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
           matchedEmployeeId: null,
           confidence: 0,
           matchStatus: 'NO_MATCH',
-          reason: 'ไม่พบใบหน้า หรือระบบ AI ไม่พร้อม',
+          reason: 'AI มองไม่เห็นใบหน้าของคุณ (กรุณาถือกล้องให้นิ่ง แสงสว่างเพียงพอ และให้หน้าอยู่ตรงกลางกรอบ)',
           isLivenessPass: false,
         };
 
