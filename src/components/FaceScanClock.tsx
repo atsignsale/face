@@ -199,9 +199,21 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
   const captureFrame = (): string | null => {
     if (!videoRef.current) return null;
     const video = videoRef.current;
+    
+    let width = video.videoWidth || 640;
+    let height = video.videoHeight || 480;
+
+    // Scale down high-res mobile cameras to prevent WebGL memory crashes
+    const MAX_DIMENSION = 640;
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+    }
+
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
