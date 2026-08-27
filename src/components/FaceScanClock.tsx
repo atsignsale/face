@@ -287,14 +287,21 @@ export const FaceScanClock: React.FC<FaceScanClockProps> = ({
         setProcessingStatusText('AI กำลังวิเคราะห์จุดเด่นใบหน้า (Local Face Recognition)...');
         
         let detection;
-        if (videoRef.current && cameraActive) {
-          detection = await faceapi.detectSingleFace(videoRef.current).withFaceLandmarks().withFaceDescriptor();
-        } else {
-           // Fallback to static image if camera not active
-           const img = new Image();
-           img.src = snapshotBase64;
-           await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-           detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+        try {
+          // ใช้รูปภาพ Snapshot (Base64) ในการประมวลผลแทนที่จะใช้ Video tag โดยตรง
+          // เพื่อแก้ปัญหา WebGL Texture Limit และบั๊กจอดำบนเบราว์เซอร์มือถือ (โดยเฉพาะ iOS Safari)
+          const img = new Image();
+          img.src = snapshotBase64;
+          await new Promise((resolve, reject) => { 
+            img.onload = resolve; 
+            img.onerror = () => reject(new Error('Failed to load snapshot image')); 
+          });
+          
+          // ปรับลด minConfidence เป็น 0.4 (จาก 0.5) เพื่อให้ตรวจจับใบหน้าในมือถือที่แสงน้อยได้ดีขึ้น
+          const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 });
+          detection = await faceapi.detectSingleFace(img, options).withFaceLandmarks().withFaceDescriptor();
+        } catch (err) {
+          console.warn('Face detection processing error:', err);
         }
 
         matchResult = {
