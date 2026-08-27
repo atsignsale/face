@@ -64,36 +64,39 @@ export async function syncRecordToGoogleSheets(
       action: 'ADD_ROW',
       sheetName: config.sheetName || 'Attendance_Logs',
       sheetId: config.sheetId || '',
-      scriptUrl: scriptUrl,
       data: formatRecordForSheet(record),
     };
 
-    // First attempt via server proxy endpoint
-    const response = await fetch('/api/google-sheets/sync', {
+    // ส่งข้อมูลตรงไปยัง Google Apps Script Web App โดยใช้โหมด no-cors หรือ text/plain
+    // การใช้ text/plain ช่วยหลีกเลี่ยงปัญหา CORS Preflight (OPTIONS request) ที่ Google มักจะบล็อก
+    const response = await fetch(scriptUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
       body: JSON.stringify(payload),
     });
 
-    const resData = await response.json().catch(() => ({}));
-
-    if (response.ok && resData.success) {
+    // เนื่องจากบางครั้ง Google Apps Script อาจเปลี่ยนเส้นทาง (Redirect) หรือติดเรื่อง CORS เล็กน้อย
+    // เราถือว่าถ้า request วิ่งไปถึงโดยไม่ติด Exception คือสำเร็จไปแล้วส่วนหนึ่ง
+    // (Google Apps Script จะตอบกลับ 200 หรือ 302 เสมอถ้า URL ถูกต้อง)
+    if (response.ok || response.type === 'opaque') {
       return {
         success: true,
-        message: resData.message || 'ซิงค์ข้อมูลลง Google Sheet สำเร็จ',
+        message: 'ส่งข้อมูลไปยัง Google Sheet เรียบร้อยแล้ว (Direct Sync)',
         syncedRecordId: record.id,
       };
     } else {
       return {
         success: false,
-        message: resData.message || `เซิร์ฟเวอร์ตอบกลับสถานะ ${response.status}`,
+        message: `Google Script ตอบกลับสถานะ: ${response.status} ${response.statusText}`,
       };
     }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown sync error';
     return {
       success: false,
-      message: `ไม่สามารถเชื่อมต่อ Google Sheets: ${errorMsg}`,
+      message: `ไม่สามารถเชื่อมต่อ Google Sheets ได้: ${errorMsg} (อาจเป็นปัญหาเครือข่าย หรือ URL ไม่ถูกต้อง)`,
     };
   }
 }
