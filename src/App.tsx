@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  INITIAL_EMPLOYEES,
-  INITIAL_ATTENDANCE_RECORDS,
   INITIAL_OFFICE_CONFIG,
   INITIAL_SHEET_CONFIG,
-  DATA_VERSION,
 } from './data/initialData';
 import {
   Employee,
@@ -20,92 +17,54 @@ import { FaceScanClock } from './components/FaceScanClock';
 import { AttendanceDashboard } from './components/AttendanceDashboard';
 import { EmployeeManagement } from './components/EmployeeManagement';
 import { SettingsView } from './components/SettingsView';
+import {
+  fetchEmployees,
+  saveEmployee,
+  deleteEmployee,
+  deleteMultipleEmployees,
+  deleteAllEmployees,
+  fetchAttendanceRecords,
+  saveAttendanceRecord,
+  deleteAttendanceRecord,
+  deleteAllAttendanceRecords,
+  fetchAppSetting,
+  saveAppSetting
+} from './utils/supabaseClient';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'scan' | 'dashboard' | 'employees' | 'settings'>('scan');
 
-  // ─── Version Guard: reset localStorage if dataset has been updated ───────────
-  // ถ้า DATA_VERSION เปลี่ยน จะล้าง app_employees และ app_attendance_records เก่าออก
-  // เพื่อให้โหลดข้อมูลพนักงานและภาพ dataset ใหม่จาก initialData โดยอัตโนมัติ
-  const storedVersion = localStorage.getItem('app_data_version');
-  if (storedVersion !== DATA_VERSION) {
-    localStorage.removeItem('app_employees');
-    localStorage.removeItem('app_attendance_records');
-    localStorage.setItem('app_data_version', DATA_VERSION);
-    console.info(`[DataVersion] Reset employees & records to v${DATA_VERSION}`);
-  }
-
-  // Persistence: Employees
-  const [employees, setEmployees] = useState<Employee[]>(() => {
-    const saved = localStorage.getItem('app_employees');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_EMPLOYEES;
-  });
-
-  // Persistence: Attendance Records
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(() => {
-    const saved = localStorage.getItem('app_attendance_records');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_ATTENDANCE_RECORDS;
-  });
-
-  // Persistence: Office Configuration
-  const [officeConfig, setOfficeConfig] = useState<OfficeConfig>(() => {
-    const saved = localStorage.getItem('app_office_config');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_OFFICE_CONFIG;
-  });
-
-  // Persistence: Google Sheet Configuration
-  const [sheetConfig, setSheetConfig] = useState<GoogleSheetConfig>(() => {
-    const saved = localStorage.getItem('app_sheet_config');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_SHEET_CONFIG;
-  });
-
-  // Geolocation state
+  // Data States
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [officeConfig, setOfficeConfig] = useState<OfficeConfig>(INITIAL_OFFICE_CONFIG);
+  const [sheetConfig, setSheetConfig] = useState<GoogleSheetConfig>(INITIAL_SHEET_CONFIG);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentGeo, setCurrentGeo] = useState<GeoLocationData | null>(null);
 
-  // Sync to LocalStorage
+  // Initial Data Fetch
   useEffect(() => {
-    localStorage.setItem('app_employees', JSON.stringify(employees));
-  }, [employees]);
-
-  useEffect(() => {
-    localStorage.setItem('app_attendance_records', JSON.stringify(attendanceRecords));
-  }, [attendanceRecords]);
-
-  useEffect(() => {
-    localStorage.setItem('app_office_config', JSON.stringify(officeConfig));
-  }, [officeConfig]);
-
-  useEffect(() => {
-    localStorage.setItem('app_sheet_config', JSON.stringify(sheetConfig));
-  }, [sheetConfig]);
+    const loadData = async () => {
+      setIsLoading(true);
+      const [
+        fetchedEmployees,
+        fetchedRecords,
+        fetchedOffice,
+        fetchedSheet
+      ] = await Promise.all([
+        fetchEmployees(),
+        fetchAttendanceRecords(),
+        fetchAppSetting<OfficeConfig>('office_config', INITIAL_OFFICE_CONFIG),
+        fetchAppSetting<GoogleSheetConfig>('sheet_config', INITIAL_SHEET_CONFIG)
+      ]);
+      setEmployees(fetchedEmployees);
+      setAttendanceRecords(fetchedRecords);
+      setOfficeConfig(fetchedOffice);
+      setSheetConfig(fetchedSheet);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
   // GPS Locator
   const refreshGeoLocation = useCallback(() => {
@@ -151,35 +110,42 @@ export default function App() {
   }, [refreshGeoLocation]);
 
   // Employee Handlers
-  const handleAddEmployee = (newEmp: Employee) => {
+  const handleAddEmployee = async (newEmp: Employee) => {
     setEmployees((prev) => [newEmp, ...prev]);
+    await saveEmployee(newEmp);
   };
 
-  const handleUpdateEmployee = (updatedEmp: Employee) => {
+  const handleUpdateEmployee = async (updatedEmp: Employee) => {
     setEmployees((prev) => prev.map((e) => (e.id === updatedEmp.id ? updatedEmp : e)));
+    await saveEmployee(updatedEmp);
   };
 
-  const handleDeleteEmployee = (id: string) => {
+  const handleDeleteEmployee = async (id: string) => {
     setEmployees((prev) => prev.filter((e) => e.id !== id));
+    await deleteEmployee(id);
   };
 
-  const handleDeleteMultipleEmployees = (ids: string[]) => {
+  const handleDeleteMultipleEmployees = async (ids: string[]) => {
     setEmployees((prev) => prev.filter((e) => !ids.includes(e.id)));
+    await deleteMultipleEmployees(ids);
   };
 
-  const handleDeleteAllEmployees = () => {
+  const handleDeleteAllEmployees = async () => {
     setEmployees([]);
+    await deleteAllEmployees();
   };
 
   const handleUpdateDataset = (employeeId: string, dataset: FacePhotoItem[]) => {
     setEmployees((prev) =>
       prev.map((emp) => {
         if (emp.id === employeeId) {
-          return {
+          const updatedEmp = {
             ...emp,
             faceDataset: dataset,
             avatarUrl: dataset.length > 0 ? dataset[0].dataUrl : emp.avatarUrl,
           };
+          saveEmployee(updatedEmp); // Update avatarUrl in db
+          return updatedEmp;
         }
         return emp;
       })
@@ -187,22 +153,37 @@ export default function App() {
   };
 
   // Attendance Handlers
-  const handleRecordAdded = (record: AttendanceRecord) => {
+  const handleRecordAdded = async (record: AttendanceRecord) => {
     setAttendanceRecords((prev) => [record, ...prev]);
+    await saveAttendanceRecord(record);
   };
 
-  const handleUpdateRecord = (updatedRecord: AttendanceRecord) => {
+  const handleUpdateRecord = async (updatedRecord: AttendanceRecord) => {
     setAttendanceRecords((prev) =>
       prev.map((r) => (r.id === updatedRecord.id ? updatedRecord : r))
     );
+    await saveAttendanceRecord(updatedRecord);
   };
 
-  const handleDeleteRecord = (id: string) => {
+  const handleDeleteRecord = async (id: string) => {
     setAttendanceRecords((prev) => prev.filter((r) => r.id !== id));
+    await deleteAttendanceRecord(id);
   };
 
-  const handleDeleteAllRecords = () => {
+  const handleDeleteAllRecords = async () => {
     setAttendanceRecords([]);
+    await deleteAllAttendanceRecords();
+  };
+
+  // Config Handlers
+  const handleSaveOfficeConfig = async (config: OfficeConfig) => {
+    setOfficeConfig(config);
+    await saveAppSetting('office_config', config);
+  };
+
+  const handleSaveSheetConfig = async (config: GoogleSheetConfig) => {
+    setSheetConfig(config);
+    await saveAppSetting('sheet_config', config);
   };
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -268,8 +249,8 @@ export default function App() {
               officeConfig={officeConfig}
               sheetConfig={sheetConfig}
               currentGeo={currentGeo}
-              onSaveOfficeConfig={setOfficeConfig}
-              onSaveSheetConfig={setSheetConfig}
+              onSaveOfficeConfig={handleSaveOfficeConfig}
+              onSaveSheetConfig={handleSaveSheetConfig}
             />
           )}
         </div>

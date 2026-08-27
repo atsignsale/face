@@ -15,6 +15,33 @@ import {
 import { Employee, FacePhotoItem } from '../types';
 import { ANGLE_DEFINITIONS } from '../data/initialData';
 import { sound } from '../utils/soundUtils';
+import { supabase } from '../utils/supabaseClient';
+
+const uploadToSupabaseStorage = async (employeeId: string, angleIndex: number, dataUrl: string) => {
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const fileName = `${employeeId}_${angleIndex}_${Date.now()}.jpg`;
+    
+    const { data, error } = await supabase.storage
+      .from('face-datasets')
+      .upload(fileName, blob, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
+      
+    if (error) throw error;
+    
+    const { data: publicUrlData } = supabase.storage
+      .from('face-datasets')
+      .getPublicUrl(fileName);
+      
+    return publicUrlData.publicUrl;
+  } catch (err) {
+    console.error('Upload to Supabase Error:', err);
+    return null;
+  }
+};
 
 interface FaceDatasetModalProps {
   employee: Employee;
@@ -96,7 +123,7 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
     setCameraActive(false);
   };
 
-  const capturePhoto = useCallback(() => {
+  const capturePhoto = useCallback(async () => {
     if (!videoRef.current) return;
     sound.playScanStart();
     const video = videoRef.current;
@@ -114,40 +141,23 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
     const targetAngle = ANGLE_DEFINITIONS[currentStepIndex];
 
+    setIsSaving(true);
+    const publicUrl = await uploadToSupabaseStorage(employee.id, targetAngle.index, dataUrl);
+    const finalDataUrl = publicUrl || dataUrl;
+
     const newPhotoItem: FacePhotoItem = {
       id: `face-${employee.id}-${targetAngle.index}-${Date.now()}`,
       angleIndex: targetAngle.index,
       angleName: targetAngle.name,
-      dataUrl: dataUrl,
+      dataUrl: finalDataUrl,
       capturedAt: new Date().toISOString(),
-    };
-
-    const handleDatasetPersist = async (updated: FacePhotoItem[]) => {
-      try {
-        const response = await fetch('/api/dataset/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ employeeId: employee.id, dataset: updated })
-        });
-        const data = await response.json();
-        if (data.success && data.updatedDataset) {
-           onSaveDataset(employee.id, data.updatedDataset);
-           setPhotos(data.updatedDataset);
-        } else {
-           console.error('Failed to upload dataset:', data.message);
-           onSaveDataset(employee.id, updated);
-        }
-      } catch (e) {
-        console.error('API Error:', e);
-        onSaveDataset(employee.id, updated);
-      }
     };
 
     setPhotos((prev) => {
       const filtered = prev.filter((p) => p.angleIndex !== targetAngle.index);
       const updated = [...filtered, newPhotoItem].sort((a, b) => a.angleIndex - b.angleIndex);
       
-      handleDatasetPersist(updated);
+      onSaveDataset(employee.id, updated);
 
       const isCompletedAll = ANGLE_DEFINITIONS.every((angle) =>
         updated.some((p) => p.angleIndex === angle.index)
@@ -167,6 +177,7 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
 
       return updated;
     });
+    setIsSaving(false);
   }, [currentStepIndex, employee.id, onSaveDataset, photos]);
 
   const triggerCountdownCapture = () => {
@@ -189,45 +200,29 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const dataUrl = event.target?.result as string;
       if (!dataUrl) return;
 
       const targetAngle = ANGLE_DEFINITIONS[currentStepIndex];
+      
+      setIsSaving(true);
+      const publicUrl = await uploadToSupabaseStorage(employee.id, targetAngle.index, dataUrl);
+      const finalDataUrl = publicUrl || dataUrl;
+
       const newPhotoItem: FacePhotoItem = {
         id: `face-${employee.id}-${targetAngle.index}-${Date.now()}`,
         angleIndex: targetAngle.index,
         angleName: targetAngle.name,
-        dataUrl: dataUrl,
+        dataUrl: finalDataUrl,
         capturedAt: new Date().toISOString(),
-      };
-
-      const handleDatasetPersist = async (updated: FacePhotoItem[]) => {
-        try {
-          const response = await fetch('/api/dataset/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ employeeId: employee.id, dataset: updated })
-          });
-          const data = await response.json();
-          if (data.success && data.updatedDataset) {
-             onSaveDataset(employee.id, data.updatedDataset);
-             setPhotos(data.updatedDataset);
-          } else {
-             console.error('Failed to upload dataset:', data.message);
-             onSaveDataset(employee.id, updated);
-          }
-        } catch (err) {
-          console.error('API Error:', err);
-          onSaveDataset(employee.id, updated);
-        }
       };
 
       setPhotos((prev) => {
         const filtered = prev.filter((p) => p.angleIndex !== targetAngle.index);
         const updated = [...filtered, newPhotoItem].sort((a, b) => a.angleIndex - b.angleIndex);
         
-        handleDatasetPersist(updated);
+        onSaveDataset(employee.id, updated);
 
         const isCompletedAll = ANGLE_DEFINITIONS.every((angle) =>
           updated.some((p) => p.angleIndex === angle.index)
@@ -247,6 +242,7 @@ export const FaceDatasetModal: React.FC<FaceDatasetModalProps> = ({
 
         return updated;
       });
+      setIsSaving(false);
     };
     reader.readAsDataURL(file);
     e.target.value = '';

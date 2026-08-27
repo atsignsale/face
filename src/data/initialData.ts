@@ -16,8 +16,8 @@ export const INITIAL_OFFICE_CONFIG: OfficeConfig = {
 
 export const INITIAL_SHEET_CONFIG: GoogleSheetConfig = {
   // นำ Google Apps Script Webhook URL มาใส่ที่นี่ เพื่อให้ทุกคนที่ใช้แอพได้ URL นี้ไปใช้ทันที
-  scriptUrl: '',
-  appsScriptUrl: '',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbydTI8Y0FhnEJMGJXCKWVzSz_cPo05OLlWci2Mfm8ai2K40ut0DfWQHc1hPFX_RATDL_A/exec',
+  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbydTI8Y0FhnEJMGJXCKWVzSz_cPo05OLlWci2Mfm8ai2K40ut0DfWQHc1hPFX_RATDL_A/exec',
   sheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
   sheetName: 'Attendance_Logs',
   autoSync: true,
@@ -48,8 +48,8 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     status: 'active',
     avatarUrl: '/dataset/PEA-001/front.jpg',
     faceDataset: [
-      { id: 'f-1-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-001/front.jpg', capturedAt: '2026-01-15T08:05:00.000Z' },
-      { id: 'f-1-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-001/left.jpg',  capturedAt: '2026-01-15T08:06:00.000Z' },
+      { id: 'f-1-1', angleIndex: 1, angleName: 'หน้าตรง (Front)', dataUrl: '/dataset/PEA-001/front.jpg', capturedAt: '2026-01-15T08:05:00.000Z' },
+      { id: 'f-1-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-001/left.jpg', capturedAt: '2026-01-15T08:06:00.000Z' },
       { id: 'f-1-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-001/right.jpg', capturedAt: '2026-01-15T08:07:00.000Z' },
     ],
   },
@@ -66,8 +66,8 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     status: 'active',
     avatarUrl: '/dataset/PEA-002/front.jpg',
     faceDataset: [
-      { id: 'f-2-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-002/front.jpg', capturedAt: '2026-02-01T08:31:00.000Z' },
-      { id: 'f-2-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-002/left.jpg',  capturedAt: '2026-02-01T08:32:00.000Z' },
+      { id: 'f-2-1', angleIndex: 1, angleName: 'หน้าตรง (Front)', dataUrl: '/dataset/PEA-002/front.jpg', capturedAt: '2026-02-01T08:31:00.000Z' },
+      { id: 'f-2-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-002/left.jpg', capturedAt: '2026-02-01T08:32:00.000Z' },
       { id: 'f-2-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-002/right.jpg', capturedAt: '2026-02-01T08:33:00.000Z' },
     ],
   },
@@ -84,8 +84,8 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     status: 'active',
     avatarUrl: '/dataset/PEA-003/front.jpg',
     faceDataset: [
-      { id: 'f-3-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-003/front.jpg', capturedAt: '2026-03-10T09:01:00.000Z' },
-      { id: 'f-3-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-003/left.jpg',  capturedAt: '2026-03-10T09:02:00.000Z' },
+      { id: 'f-3-1', angleIndex: 1, angleName: 'หน้าตรง (Front)', dataUrl: '/dataset/PEA-003/front.jpg', capturedAt: '2026-03-10T09:01:00.000Z' },
+      { id: 'f-3-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-003/left.jpg', capturedAt: '2026-03-10T09:02:00.000Z' },
       { id: 'f-3-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-003/right.jpg', capturedAt: '2026-03-10T09:03:00.000Z' },
     ],
   },
@@ -102,8 +102,8 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     status: 'active',
     avatarUrl: '/dataset/PEA-004/front.jpg',
     faceDataset: [
-      { id: 'f-4-1', angleIndex: 1, angleName: 'หน้าตรง (Front)',           dataUrl: '/dataset/PEA-004/front.jpg', capturedAt: '2026-03-12T09:16:00.000Z' },
-      { id: 'f-4-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-004/left.jpg',  capturedAt: '2026-03-12T09:17:00.000Z' },
+      { id: 'f-4-1', angleIndex: 1, angleName: 'หน้าตรง (Front)', dataUrl: '/dataset/PEA-004/front.jpg', capturedAt: '2026-03-12T09:16:00.000Z' },
+      { id: 'f-4-2', angleIndex: 2, angleName: 'หันซ้าย 20° (Slight Left)', dataUrl: '/dataset/PEA-004/left.jpg', capturedAt: '2026-03-12T09:17:00.000Z' },
       { id: 'f-4-3', angleIndex: 3, angleName: 'หันขวา 20° (Slight Right)', dataUrl: '/dataset/PEA-004/right.jpg', capturedAt: '2026-03-12T09:18:00.000Z' },
     ],
   },
