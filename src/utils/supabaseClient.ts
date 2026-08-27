@@ -12,7 +12,13 @@ const isSupabaseConfigured =
   !supabaseUrl.includes('YOUR-PROJECT-ID') &&
   supabaseUrl.startsWith('https://');
 
-export const supabase = isSupabaseConfigured ? createClient(supabaseUrl, supabaseKey) : null as any;
+export const supabase = isSupabaseConfigured ? createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  }
+}) : null as any;
 
 // --- Helper Functions for LocalStorage Fallback ---
 const getLocalItem = <T>(key: string, defaultValue: T): T => {
